@@ -1,22 +1,41 @@
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import loginImage from '../assets/image/login.svg';
+import { useDispatch, useSelector } from 'react-redux';
+import { googleLogin, loginUser } from '../redux/features/user/userSlice';
+import toast from 'react-hot-toast';
+import { useEffect, useState } from 'react';
+import ForgetPasswordModal from './ForgetPasswordModal';
 const Login = () => {
   const { register, handleSubmit } = useForm();
   const navigate = useNavigate();
+  const dispatch = useDispatch()
+  const { isLoading, isError, error } = useSelector((state) => state.userSlice)
+  
+  const [isOpen, setIsOpen] = useState(false);
 
   const onSubmit = ({ email, password }) => {
     // Email Password Login
-
+    dispatch(loginUser({ email, password }))
+    if(!error){
+      toast.success('login successfull')
+    }
     console.log(email, password);
   };
 
   const handleGoogleLogin = () => {
     //  Google Login
+    dispatch(googleLogin())
   };
 
+  useEffect(() => {
+    if (error && isError) {
+      toast.error(error)
+    }
+  }, [isError, error])
+
   return (
-    <div className="flex max-w-7xl h-screen items-center mx-auto">
+    <div className="flex max-w-7xl h-full items-center mx-auto">
       <div className="w-1/2">
         <img src={loginImage} className="h-full w-full" alt="" />
       </div>
@@ -57,6 +76,12 @@ const Login = () => {
                   Sign up
                 </span>
               </p>
+              <span
+                className="underline text-left w-full"
+                onClick={() => setIsOpen(true)}
+              >
+                forget password
+              </span>
             </div>
             <button
               type="button"
@@ -66,6 +91,7 @@ const Login = () => {
               Login with Google
             </button>
           </form>
+          <ForgetPasswordModal isOpen={isOpen} setIsOpen={setIsOpen}></ForgetPasswordModal>
         </div>
       </div>
     </div>
